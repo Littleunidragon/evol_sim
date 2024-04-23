@@ -108,10 +108,18 @@ def evolve(population_size, gene_length, mutation_rate, num_generations, parent_
     # Connect to the SQLite database
     conn = sqlite3.connect('evolution_data.db')
     c = conn.cursor()
-
+    # Create creatures table if not exists
+    c.execute('''CREATE TABLE IF NOT EXISTS creature
+                 (creature_id INTEGER, generation, creature_data TEXT, fitness REAL)''')
     # Create evolution_results table if not exists
     c.execute('''CREATE TABLE IF NOT EXISTS evolution_results
                  (generation INTEGER, best_creature TEXT, fitness REAL)''')
+    # Create detailed_info table if not exists
+    c.execute('''CREATE TABLE IF NOT EXISTS detailed_info
+                 (generation INTEGER,avg_fitness REAL, max_fitness REAL)''')
+    # Create generation table if not exists
+    c.execute('''CREATE TABLE IF NOT EXISTS generation
+                 (generation INTEGER, time_running REAL)''')
 
     # Generate initial population
     population = [generate_creature() for _ in range(population_size)]
@@ -121,8 +129,18 @@ def evolve(population_size, gene_length, mutation_rate, num_generations, parent_
 
     # Evolution loop
     for generation in range(num_generations):
+        start_time = time.time()  # Start time for the generation
         # Calculate fitness for each creature
         fitness_values = [calculate_fitness(creature) for creature in population]
+        avg_fitness = np.mean(fitness_values)
+        max_fitness = max(fitness_values)
+        # Insert data for each creature in the current generation into the creatures table
+        for i, creature in enumerate(population):
+            c.execute("INSERT INTO creature VALUES (?, ?, ?, ?)",
+                      (i + 1,generation+1, str(creature), fitness_values[i]))
+        # Insert average and max fitness for the generation into the detailed_info table
+        c.execute("INSERT INTO detailed_info VALUES (?, ?, ?)",
+                    (generation+1, avg_fitness, max_fitness))
 
         # Select parents and perform crossover to create new generation
         new_population = []
@@ -142,7 +160,11 @@ def evolve(population_size, gene_length, mutation_rate, num_generations, parent_
 
         # Insert generation data into the database
         c.execute("INSERT INTO evolution_results VALUES (?, ?, ?)", (generation + 1, str(best_creature), calculate_fitness(best_creature)))
-
+        # Record generation information
+        end_time = time.time()  # End time for the generation
+        time_running = end_time - start_time
+        c.execute("INSERT INTO generation VALUES (?, ?)",
+                  (generation + 1, time_running))
         # Print best creature in each generation
         print(f"Generation {generation + 1}: Best creature - {best_creature}, Fitness - {calculate_fitness(best_creature)}")
 
