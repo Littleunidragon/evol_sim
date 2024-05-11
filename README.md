@@ -11,7 +11,7 @@ This is a Python-based evolutionary simulation program that uses neural networks
 
 ## Getting Started:
 
-1. Install Python if not already installed. You can download Python from the [official website](https://www.python.org/).
+1. Install Python 3.11.4 if not already installed. You can download Python from the [official website](https://www.python.org/). Python should be added to PATH!
 2. Clone or download the repository to your local machine.
 3. Install the required dependencies using the provided `requirements.txt` file.
    ```bash
