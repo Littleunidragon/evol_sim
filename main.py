@@ -6,6 +6,8 @@ import time
 import sqlite3
 import numpy as np
 
+#fnlwfnliwfnlweflfwgfnwf
+
 # Constants (default values)
 DEFAULT_POPULATION_SIZE = 20
 DEFAULT_GENE_LENGTH = 20  # Increased gene length for more diversity
